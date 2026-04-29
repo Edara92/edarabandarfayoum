@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>الإحصائية العددية لإدارة بندر الفيوم الصحية</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    .nav-btn {
+  padding:8px 12px;
+  border-radius:10px;
+  border:none;
+  cursor:pointer;
+  font-weight:700;
+  background:#e9eef6;
+  color:#003366;
+}
+
+.nav-btn.active {
+  background:#003366;
+  color:white;
+}
+
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+    body { font-family:'Cairo',sans-serif; background:#f6f8fa; margin:14px; color:#222; }
+
+    .grid { 
+  display:grid; 
+  grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); 
+  gap:14px; 
+  direction: rtl;
+  grid-auto-flow: row;
+}
+    .center-card { padding:14px; border-radius:14px; margin-bottom:6px; box-shadow:0 6px 18px rgba(6,24,63,0.06); border:1px solid rgba(0,0,0,0.06); color:#07263b; display:flex; flex-direction:column; }
+    .center-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .center-name { font-size:16px; font-weight:700; }
+    .highlight-name{
+  background: linear-gradient(135deg,#003366,#0077cc);
+  color:#fff;
+  padding:3px 10px;
+  border-radius:8px;
+  font-size:14px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.15);
+  display:inline-block;
+}
+.highlight-total{
+  background: linear-gradient(135deg,#003366,#0077cc);
+  color:#fff;
+  padding:3px 10px;
+  border-radius:8px;
+  font-size:14px;
+  font-weight:700;
+  box-shadow:0 2px 6px rgba(0,0,0,0.15);
+  display:inline-block;
+  border:none;
+}
+    .total-pill { background:#fff; padding:6px 12px; border-radius:12px; font-weight:700; border:1px solid #d0d8e6; color:#003d7a; }
+
+    .group-card { background:#ffffffd8; border-radius:12px; padding:10px; border:1px solid #d6e0ee; box-shadow:0 2px 6px rgba(0,0,0,0.06); margin-bottom:10px; display:flex; flex-direction:column; }
+    .jobsWrapper { flex:1; overflow-y:auto; padding-right:4px; margin-top:6px; max-height:255px; }
+    .jobs-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; }
+    .job-box { background:#fff; border:1px solid #d6e0ee; padding:8px; border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+    .job-name { font-weight:700; margin-bottom:4px; }
+    .job-total { font-weight:700; text-align:left; }
+
+    .summary-wrapper { 
+  width:100%; 
+  display:flex; 
+  gap:14px;
+  justify-content:space-between;
+  align-items:stretch;
+  margin-bottom:20px; 
+}
+.summary-card { 
+  flex: 1 1 0;
+  min-width: 0;
+  border-radius:16px; 
+  padding:14px; 
+  display:flex; 
+  flex-direction:column; 
+  border:1px solid rgba(0,0,0,0.1); 
+  box-shadow:0 6px 18px rgba(6,24,63,0.08); 
+}
+
+
+    .download-btn { margin-top:10px; padding:8px 12px; border-radius:10px; border:none; background:#0077cc; color:white; cursor:pointer; font-weight:700; align-self:flex-end;display: inline-block;
+width: auto;
+ }
+ .download-btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+.download-btn.loading {
+  background: #9aa5b1 !important;
+  cursor: not-allowed;
+  pointer-events: none;
+  position: relative;
+}
+
+.download-btn.loading::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  position: absolute;
+  left: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg) translateY(-50%); }
+}
+
+    /* ===== Animated header only ===== */
+.animated-header{
+  text-align:center;
+  background:#dce6f9;
+  color:#003366;
+  padding:16px 18px;
+  border-radius:12px;
+  margin-bottom:8px;
+  animation: slideFadeDown .9s ease-out;
+}
+
+@keyframes slideFadeDown{
+  from{
+    transform: translateY(-20px);
+    opacity:0;
+  }
+  to{
+    transform: translateY(0);
+    opacity:1;
+  }
+}
+
+.animated-header h1{
+  font-size:20px;
+  margin:0;
+  font-weight:700;
+}
+
+.dev-line{
+  margin-top:6px;
+  font-size:14px;
+  opacity:.95;
+}
+
+/* ===== glowing name ===== */
+.dev-line span{
+  font-weight:700;
+  color:#b8860b;
+  animation: softGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes softGlow{
+  0%   { text-shadow:0 0 0 rgba(184,134,11,0); }
+  50%  { text-shadow:0 0 10px rgba(184,134,11,.8); }
+  100% { text-shadow:0 0 0 rgba(184,134,11,0); }
+}
+/* ===== Mobile Zoom Performance Fix ===== */
+@media (pointer: coarse) {
+
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .card,
+  .container,
+  .search-box,
+  .animated-header {
+    box-shadow: none !important;
+  }
+
+  .navbar {
+    position: relative !important;
+  }
+
+  body {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  img, iframe {
+    will-change: transform;
+  }
+}
+.card-animate-right {
+  animation: slideInRight 1.2s cubic-bezier(.22,.61,.36,1) forwards;
+}
+
+.card-animate-left {
+  animation: slideInLeft 1.2s cubic-bezier(.22,.61,.36,1) forwards;
+}
+
+.card-fade-up {
+  animation: fadeUp .9s cubic-bezier(.22,.61,.36,1) forwards;
+}
+
+
+@keyframes slideInRight {
+  from { transform: translateX(40px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-40px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.center-card:hover {
+  transform: translateY(-4px);
+  box-shadow:0 10px 26px rgba(6,24,63,0.14);
+  transition: .25s ease;
+}
+.center-card,
+.summary-card {
+  will-change: transform, opacity;
+}
+#confettiCanvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+#loadingOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,.85);
+  display: none;
+  z-index: 10000;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-track {
+  position: relative;
+  width: 320px;
+  height: 18px;
+  background: #e0e6ed;
+  border-radius: 12px;
+  overflow: visible; /* ⬅️ بدل hidden */
+}
+
+
+.loading-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg,#4facfe,#00f2fe);
+  border-radius: 10px;
+}
+
+
+.horse {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  transform: translateX(50%);
+  pointer-events: none;
+}
+
+.loading-text {
+  margin-top: 14px;
+  font-weight: 700;
+  color: #003366;
+}
+
+.section-divider{
+height:6px;
+background:#000;
+width:100%;
+margin:25px 0;
+border-radius:4px;
+}
+#excelLoadingOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,.88);
+  z-index: 999999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-weight: 800;
+  color: #003366;
+  font-size: 22px;
+}
+
+.excel-spinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid #dce6f9;
+  border-top: 6px solid #003366;
+  border-radius: 50%;
+  animation: excelSpin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes excelSpin {
+  to { transform: rotate(360deg); }
+}
+  </style>
+</head>
+<body>
+
+<div id="excelLoadingOverlay">
+  <div class="excel-spinner"></div>
+  <div>جاري تحميل ملف الأكسل...</div>
+</div>
+
+<div style="margin:10px 0; display:flex; gap:8px;">
+<button class="nav-btn active" onclick="goToIndex()">اللوحة الرئيسية</button>
+<button class="nav-btn" onclick="goToSearch()">صفحة البحث</button>
+<button class="nav-btn" onclick="goToEmployeeFormTop()">إضافة / تعديل موظف</button>
+</div>
+
+<script>
+  let confettiActive = false;
+
+function launchConfetti(duration = 2000) {
+  const canvas = document.getElementById('confettiCanvas');
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.width = window.innerWidth * dpr;
+  canvas.height = window.innerHeight * dpr;
+  ctx.scale(dpr, dpr);
+
+  const colors = ['#ff6b6b','#feca57','#54a0ff','#1dd1a1','#5f27cd'];
+  const pieces = [];
+
+  for (let i = 0; i < 140; i++) {
+    pieces.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * -window.innerHeight,
+      size: 6 + Math.random() * 6,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      speed: 2 + Math.random() * 3,
+      tilt: Math.random() * 10
+    });
+  }
+
+  confettiActive = true;
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    pieces.forEach(p => {
+      ctx.beginPath();
+      ctx.fillStyle = p.color;
+      ctx.fillRect(p.x, p.y, p.size, p.size / 2);
+      p.y += p.speed;
+      p.x += Math.sin(p.tilt);
+    });
+
+    if (confettiActive) requestAnimationFrame(draw);
+  }
+
+  draw();
+
+setTimeout(() => {
+  confettiActive = false;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  canvas.style.display = 'none';
+}, duration);
+}
+
+let navigating = false;
+
+function goToPage(page) {
+  if (navigating) return;
+  navigating = true;
+
+  google.script.run.withSuccessHandler(url => {
+    window.top.location.href = url + '?page=' + encodeURIComponent(page);
+  }).getWebAppUrl();
+}
+
+function goToEmployeeFormTop() {
+  localStorage.removeItem('selectedEmployeeKey');
+  goToPage('EmployeeForm');
+}
+
+function goToIndex() {
+  goToPage('Index');
+}
+
+function goToSearch() {
+  goToPage('Employees');
+}
+</script>
+
+<header class="animated-header">
+  <h1>الإحصائية العددية لإدارة بندر الفيوم الصحية</h1>
+  <div class="dev-line">
+    تمت البرمجة بواسطة <span>الدكتور شارل مخلص</span>
+  </div>
+</header>
+<canvas id="confettiCanvas"></canvas>
+<div id="loadingOverlay">
+  <div class="loading-track">
+    <div class="loading-bar"></div>
+    <div class="horse">🐎</div>
+  </div>
+  <div class="loading-text">جاري التحميل…</div>
+</div>
+
+<div id="content">
+  <div style="text-align:center; padding:30px;">جاري التحميل…</div>
+</div>
+
+<script>
+startLoadingBar(); // بدء البار والحصان
+google.script.run
+    .withSuccessHandler(render)
+    .withFailureHandler(err=>{
+        finishLoadingBar();
+        alert("حدث خطأ أثناء تحميل البيانات");
+    })
+    .getDashboardFromEmployees();
+
+
+
+function render(payload) {
+  launchConfetti(1800);
+  if (!payload || !payload.dashboardCenters) return;
+  const centers = payload.dashboardCenters;
+  const centersWithoutAdmin = centers.filter(c =>
+  c.name && c.name.trim() !== "الأدارة"
+);
+  const container = document.getElementById("content");
+  container.innerHTML = "";
+const summaryDiv = document.createElement("div");
+summaryDiv.className = "summary-wrapper";
+summaryDiv.style.display = "flex";
+summaryDiv.style.gap = "14px";
+summaryDiv.style.flexWrap = "nowrap";
+summaryDiv.style.justifyContent = "center";
+
+  // ملخص الكل
+  let totalAll = 0;
+  let allGroups = {};
+  let allGroupsWithoutAdmin = {};
+  let totalWithoutAdmin = 0;
+  centers.forEach(center => {
+    totalAll += center.total;
+    center.groups.forEach(g => {
+      if (!allGroups[g.name]) allGroups[g.name] = [];
+      g.jobs.forEach(j => {
+        const job = allGroups[g.name].find(x => x.name == j.name);
+        if (job) job.total += j.total;
+        else allGroups[g.name].push({name:j.name, total:j.total});
+      });
+    });
+  });
+// تجميع بدون الأدارة
+centersWithoutAdmin.forEach(center => {
+  totalWithoutAdmin += center.total;
+  center.groups.forEach(g => {
+    if (!allGroupsWithoutAdmin[g.name]) allGroupsWithoutAdmin[g.name] = [];
+    g.jobs.forEach(j => {
+      const job = allGroupsWithoutAdmin[g.name].find(x => x.name == j.name);
+      if (job) job.total += j.total;
+      else allGroupsWithoutAdmin[g.name].push({name:j.name, total:j.total});
+    });
+  });
+});
+
+summaryDiv.className = "summary-wrapper";
+summaryDiv.style.gap = "14px";
+summaryDiv.style.display = "flex";
+summaryDiv.style.flexWrap = "nowrap";
+summaryDiv.style.justifyContent = "center";
+
+  const sumCard = document.createElement("div");
+  sumCard.className = "center-card summary-card";
+  sumCard.style.background = "linear-gradient(180deg,#e8f1ff,#cfe4ff)";
+
+  sumCard.innerHTML = `
+    <div class="center-header">
+      <div class="center-name">إجمالي الأعداد بكل المراكز+ أعداد الإدارة</div>
+      <div class="total-pill">${totalAll}</div>
+    </div>
+  `;
+
+  // زر التحميل داخل كارت الملخص (سيظهر على اليمين داخل الكارت)
+  const dlBtn = document.createElement('button');
+  dlBtn.className = 'download-btn';
+  dlBtn.textContent = 'تنزيل ملف الإكسل';
+  dlBtn.onclick = function(){ downloadWorkforceExcel(); };
+  sumCard.appendChild(dlBtn);
+
+  // ترتيب البشرى
+  let doctorGroup = allGroups["طبيب بشرى"] ?? null;
+  let others = Object.keys(allGroups).filter(n => n !== "طبيب بشرى");
+
+  if (doctorGroup){
+    const gCard = makeGroupCard("طبيب بشرى", doctorGroup);
+    sumCard.appendChild(gCard);
+  }
+
+  if (others.length > 0){
+    const scroll = document.createElement("div");
+    scroll.className = "jobsWrapper";
+    scroll.style.maxHeight = "340px";
+    others.forEach(name=>{
+      const gCard = makeGroupCard(name, allGroups[name]);
+      scroll.appendChild(gCard);
+    });
+    sumCard.appendChild(scroll);
+  }
+// ===== كارت إجمالى المراكز فقط (بدون الأدارة) =====
+const sumCardNoAdmin = document.createElement("div");
+sumCardNoAdmin.className = "center-card summary-card";
+sumCardNoAdmin.style.background = "linear-gradient(180deg,#f1fff3,#d8f5de)";
+sumCardNoAdmin.innerHTML = `
+  <div class="center-header">
+    <div class="center-name">إجمالي الأعداد بكل المراكز بدون أعداد الإدارة</div>
+    <div class="total-pill">${totalWithoutAdmin}</div>
+  </div>
+`;
+
+const btn2 = document.createElement('button');
+btn2.className = 'download-btn';
+btn2.textContent = 'تنزيل ملف الإكسل';
+btn2.onclick = ()=> downloadWorkforceExcelWithoutAdmin();
+sumCardNoAdmin.appendChild(btn2);
+
+// نفس ترتيب عرض المجموعات زي الكارت الأصلي
+let doctorOnly = allGroupsWithoutAdmin["طبيب بشرى"] ?? null;
+let otherGroupsOnly = Object.keys(allGroupsWithoutAdmin).filter(n => n !== "طبيب بشرى");
+
+if (doctorOnly){
+  sumCardNoAdmin.appendChild(
+    makeGroupCard("طبيب بشرى", doctorOnly)
+  );
+}
+
+if (otherGroupsOnly.length){
+  const scroll = document.createElement("div");
+  scroll.className = "jobsWrapper";
+  scroll.style.maxHeight = "340px";
+  otherGroupsOnly.forEach(g=>{
+    scroll.appendChild(
+      makeGroupCard(g, allGroupsWithoutAdmin[g])
+    );
+  });
+  sumCardNoAdmin.appendChild(scroll);
+}
+
+summaryDiv.appendChild(sumCardNoAdmin);
+summaryDiv.appendChild(sumCard);
+container.appendChild(summaryDiv);
+
+// خط فاصل
+const divider1 = document.createElement("div");
+divider1.style.height="6px";
+divider1.style.background="#000";
+divider1.style.margin="25px 0";
+divider1.style.borderRadius="4px";
+container.appendChild(divider1);
+
+
+// كارت إحصائية الأطباء
+google.script.run
+.withFailureHandler(function(err){
+  finishLoadingBar();
+  alert("حدث خطأ أثناء تحميل إحصائية الأطباء");
+})
+.withSuccessHandler(function(data){
+
+const statsWrapper = document.createElement("div");
+statsWrapper.style.display = "flex";
+statsWrapper.style.gap = "14px";
+statsWrapper.style.flexWrap = "nowrap";
+statsWrapper.style.margin = "20px 0";
+
+const card = document.createElement("div");
+const centerDoctorsCard = document.createElement("div");
+centerDoctorsCard.className = "center-card summary-card";
+centerDoctorsCard.style.flex = "1";
+centerDoctorsCard.style.background = "linear-gradient(180deg,#e9fff2,#c7ffd9)";
+
+centerDoctorsCard.innerHTML = `
+<div class="center-header">
+<div class="center-name">إحصائية [الأطباء البشرى] حسب المراكز</div>
+<div class="total-pill">${data.total}</div>
+</div>
+`;
+card.className = "center-card summary-card";
+card.style.flex = "1";
+card.style.background = "linear-gradient(180deg,#fff3e6,#ffe0b8)";
+card.innerHTML=`
+<div class="center-header">
+<div class="center-name">إحصائية [الأطباء البشرى] حسب التخصص</div>
+<div class="total-pill">${data.total}</div>
+</div>
+`;
+
+const sortedSpecs = Object.keys(data.specs).sort((a,b)=>{
+  const totalA = Object.values(data.specs[a]).reduce((x,y)=>x+y,0);
+  const totalB = Object.values(data.specs[b]).reduce((x,y)=>x+y,0);
+  return totalB - totalA; // ترتيب تنازلي
+});
+const centersMap = {};
+
+Object.keys(data.specs).forEach(spec=>{
+  const places = data.specs[spec];
+
+  Object.keys(places).forEach(place=>{
+    if(!centersMap[place]) centersMap[place] = [];
+
+    centersMap[place].push({
+      name: spec,
+      total: places[place]
+    });
+  });
+});
+sortedSpecs.forEach(spec=>{
+
+   const placesObj = data.specs[spec];
+
+let places = Object.keys(placesObj).map(p=>{
+  return {name:p,total:placesObj[p]};
+});
+
+places.sort((a,b)=> b.total - a.total); // ترتيب تنازلي حسب العدد
+
+   const specCard = makeSpecialtyCard(spec,places);
+
+   card.appendChild(specCard);
+
+});
+const sortedCenters = Object.keys(centersMap).sort((a,b)=>{
+  const totalA = centersMap[a].reduce((x,y)=> x + y.total ,0);
+  const totalB = centersMap[b].reduce((x,y)=> x + y.total ,0);
+  return totalB - totalA;
+});
+sortedCenters.forEach(centerName=>{
+
+  const jobs = centersMap[centerName].sort((a,b)=> b.total - a.total);
+
+  const centerCard = makeGroupCard(centerName, jobs);
+
+  centerDoctorsCard.appendChild(centerCard);
+
+});
+statsWrapper.appendChild(card);
+statsWrapper.appendChild(centerDoctorsCard);
+
+container.insertBefore(statsWrapper, grid);
+
+
+// خط فاصل
+const divider2 = document.createElement("div");
+divider2.style.height="6px";
+divider2.style.background="#000";
+divider2.style.margin="25px 0";
+divider2.style.borderRadius="4px";
+
+container.insertBefore(divider2, grid);
+finishLoadingBar();
+}).getHumanDoctorsStatistics();
+requestAnimationFrame(() => {
+  sumCard.classList.add('card-animate-right');
+  sumCardNoAdmin.classList.add('card-animate-left');
+});
+
+  // بقية المراكز
+  const palette = [
+    ['#e8f1ff','#cfe4ff'], ['#fff3e6','#ffe0b8'],
+    ['#e9fff2','#c7ffd9'], ['#fff0f6','#ffd6eb'],
+    ['#f3f7ff','#dfe9ff'], ['#fff7e9','#ffebc9'],
+    ['#eef9ff','#d8f1ff'], ['#f7fff0','#e1ffd6']
+  ];
+
+  const grid = document.createElement("div");
+  grid.className = "grid";
+  container.appendChild(grid);
+
+  centers.forEach((center, idx) => {
+    const card = document.createElement("div");
+    card.className = "center-card";
+requestAnimationFrame(() => {
+  card.classList.add('card-fade-up');
+  card.style.animationDelay = (idx * 0.12) + 's';
+});
+
+    const pal = palette[idx % palette.length];
+    card.style.background = `linear-gradient(180deg, ${pal[0]}, ${pal[1]})`;
+
+    card.innerHTML = `
+      <div class="center-header">
+        <div class="center-name">${center.name}</div>
+        <div class="total-pill">إجمالى القوة: ${center.total}</div>
+      </div>
+    `;
+
+    // الطبيب البشري أولاً
+    let doctor = center.groups.find(g => g.name === "طبيب بشرى");
+    let otherGroups = center.groups.filter(g => g.name !== "طبيب بشرى");
+
+    if (doctor){
+      const gCard = makeGroupCard("طبيب بشرى", doctor.jobs);
+      card.appendChild(gCard);
+    }
+
+    if (otherGroups.length > 0){
+      const scroll = document.createElement("div");
+      scroll.className = "jobsWrapper";
+      otherGroups.forEach(g=>{
+        const gCard = makeGroupCard(g.name, g.jobs);
+        scroll.appendChild(gCard);
+      });
+      card.appendChild(scroll);
+    }
+
+    grid.appendChild(card);
+  });
+}
+
+// ===== إنشاء Grid جديد للكروت =====
+
+const specialtyGrid = document.createElement("div");
+specialtyGrid.className = "grid";
+
+container.appendChild(specialtyGrid);
+/* دالة تجهيز كارت مجموعة */
+function makeGroupCard(groupName, jobs){
+  const gCard = document.createElement("div");
+  gCard.className = "group-card";
+  let total = jobs.reduce((a,b)=>a + b.total, 0);
+gCard.innerHTML = `
+<div class="center-header">
+<div class="center-name highlight-name">${groupName} ${total}</div>
+</div>
+`;
+  const wrap = document.createElement("div");
+  wrap.className = "jobsWrapper";
+  const grid = document.createElement("div");
+  grid.className = "jobs-grid";
+  jobs.forEach(j=>{
+    const box = document.createElement("div");
+    box.className = "job-box";
+    box.innerHTML = `<div class="job-name">${j.name}</div><div class="job-total">${j.total}</div>`;
+    grid.appendChild(box);
+  });
+  wrap.appendChild(grid);
+  gCard.appendChild(wrap);
+  return gCard;
+}
+function makeSpecialtyCard(specName, places){
+
+  const gCard = document.createElement("div");
+  gCard.className = "group-card";
+
+  let total = 0;
+  places.forEach(p => total += p.total);
+
+gCard.innerHTML = `
+<div class="center-header">
+<div class="center-name highlight-name">${specName} ${total}</div>
+</div>
+`;
+
+  const wrap = document.createElement("div");
+  wrap.className = "jobsWrapper";
+
+  const grid = document.createElement("div");
+  grid.className = "jobs-grid";
+
+  places.forEach(p => {
+
+    const box = document.createElement("div");
+    box.className = "job-box";
+
+    box.innerHTML = `
+      <div class="job-name">${p.name}</div>
+      <div class="job-total">${p.total > 0 ? p.total : "لا يوجد"}</div>
+    `;
+
+    grid.appendChild(box);
+
+  });
+
+  wrap.appendChild(grid);
+  gCard.appendChild(wrap);
+
+  return gCard;
+}
+function setLoadingState(isLoading, text = "جاري التحميل…") {
+  document.querySelectorAll('.download-btn').forEach(btn => {
+    if (isLoading) {
+      btn.dataset.oldText = btn.textContent;
+      btn.textContent = text;
+      btn.classList.add('loading');
+      btn.disabled = true;
+    } else {
+      btn.textContent = btn.dataset.oldText || 'تنزيل ملف الإكسل';
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+  });
+}
+let fakeProgressInterval = null;
+let currentProgress = 0;
+
+function startLoadingBar() {
+  const overlay = document.getElementById('loadingOverlay');
+  const track = document.querySelector('.loading-track');
+  const bar = document.querySelector('.loading-bar');
+  const horse = document.querySelector('.horse');
+
+  overlay.style.display = 'flex';
+  bar.style.width = '0%';
+  horse.style.right = '0px'; // يبدأ من اليمين فعلًا
+
+  let progress = 0;
+
+  function animate() {
+    if (progress < 90) {
+
+let speed;
+if (progress < 40) speed = 0.6;
+else if (progress < 70) speed = 0.35;
+else if (progress < 85) speed = 0.18;
+else speed = 0.06; // 👈 حركة بطيئة مستمرة قرب 90
+
+
+      progress = Math.min(progress + speed, 90);
+      bar.style.width = progress + '%';
+
+      // ✅ حساب موضع الحصان من عرض البار الحقيقي
+      const barWidth = bar.getBoundingClientRect().width;
+      horse.style.right = barWidth + 'px';
+
+      requestAnimationFrame(animate);
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+
+
+
+function finishLoadingBar() {
+  const bar = document.querySelector('.loading-bar');
+  const horse = document.querySelector('.horse');
+  const overlay = document.getElementById('loadingOverlay');
+
+  let progress = parseFloat(bar.style.width) || 90;
+
+  function complete() {
+    if (progress < 100) {
+
+      // سرعة إكمال ناعمة
+      progress = Math.min(progress + 0.8, 100);
+      bar.style.width = progress + '%';
+
+      // الحصان مربوط بعرض البار الحقيقي
+      const barWidth = bar.getBoundingClientRect().width;
+      horse.style.right = barWidth + 'px';
+
+      requestAnimationFrame(complete);
+
+    } else {
+      // اختفاء اللودر بعد اكتمال 100%
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 250);
+    }
+  }
+
+  requestAnimationFrame(complete);
+}
+
+
+
+function showExcelLoading(text = "جاري تحميل ملف الأكسل...") {
+  const overlay = document.getElementById("excelLoadingOverlay");
+  if (!overlay) return;
+  overlay.querySelector("div:last-child").textContent = text;
+  overlay.style.display = "flex";
+}
+
+function hideExcelLoading() {
+  const overlay = document.getElementById("excelLoadingOverlay");
+  if (!overlay) return;
+  overlay.style.display = "none";
+}
+
+/* زر تحميل الاكسل: ينادي دالة Apps Script الجديدة */
+function downloadWorkforceExcel(){
+  showExcelLoading("جاري تحميل ملف الأكسل...");
+  setLoadingState(true);
+
+  google.script.run
+    .withFailureHandler(err=>{
+      hideExcelLoading();
+      setLoadingState(false);
+      alert('حدث خطأ أثناء إنشاء الملف');
+    })
+    .withSuccessHandler(url=>{
+      if(url) window.open(url, '_blank');
+
+      setTimeout(() => {
+        hideExcelLoading();
+        setLoadingState(false);
+      }, 800);
+    })
+    .exportWorkforceExcel();
+}
+
+function downloadWorkforceExcelWithoutAdmin(){
+  showExcelLoading("جاري تحميل ملف الأكسل...");
+  setLoadingState(true);
+
+  google.script.run
+    .withFailureHandler(err=>{
+      hideExcelLoading();
+      setLoadingState(false);
+      alert(err);
+    })
+    .withSuccessHandler(url=>{
+      if(url) window.open(url, '_blank');
+
+      setTimeout(() => {
+        hideExcelLoading();
+        setLoadingState(false);
+      }, 800);
+    })
+    .exportWorkforceExcelFilteredWithoutAdmin();
+}
+
+
+</script>
+</body>
+</html>
+
