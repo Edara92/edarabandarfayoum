@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<title>إضافة / تعديل موظف</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+body{font-family:'Cairo',sans-serif;background:#f6f8fa;margin:14px;color:#222}
+
+.nav-btn{
+  padding:8px 12px;border-radius:10px;border:none;cursor:pointer;
+  font-weight:700;background:#e9eef6;color:#003366
+}
+.nav-btn.active{background:#003366;color:#fff}
+
+.top-nav{display:flex;gap:8px;margin-bottom:12px}
+.container{
+  background:#fff;padding:16px;border-radius:12px;
+  box-shadow:0 6px 18px rgba(6,24,63,.06)
+}
+.form-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:10px
+}
+.field{display:flex;flex-direction:column}
+.field label{font-weight:700;margin-bottom:6px}
+.field input,.field select{
+  padding:8px;border-radius:8px;border:1px solid #ccc
+}
+.single-form{
+  border:2px solid #ccc;padding:10px;margin-bottom:15px;
+  border-radius:12px;background:#fdfdfd
+}
+.actions{margin-top:15px;display:flex;gap:10px}
+button.main{
+  background:#003366;color:#fff;border:none;
+  padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer
+}
+button.delete{
+  background:#c0392b;color:#fff;border:none;
+  padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer
+}
+#formMsg{margin-bottom:10px;font-weight:700;display:none}
+/* ===== Animated header (Employee Form) ===== */
+.animated-header{
+  text-align:center;
+  background:#dce6f9;
+  color:#003366;
+  padding:16px 18px;
+  border-radius:12px;
+  margin-bottom:14px;
+  animation: slideFadeDown .9s ease-out;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+@keyframes slideFadeDown{
+  from{
+    transform: translateY(-20px);
+    opacity:0;
+  }
+  to{
+    transform: translateY(0);
+    opacity:1;
+  }
+}
+
+.animated-header h1{
+  font-size:20px;
+  margin:0;
+  font-weight:700;
+}
+
+.dev-line{
+  margin-top:6px;
+  font-size:14px;
+  opacity:.95;
+}
+
+/* ===== glowing name ===== */
+.dev-line span{
+  font-weight:700;
+  color:#b8860b;
+  animation: softGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes softGlow{
+  0%   { text-shadow:0 0 0 rgba(184,134,11,0); }
+  50%  { text-shadow:0 0 10px rgba(184,134,11,.8); }
+  100% { text-shadow:0 0 0 rgba(184,134,11,0); }
+}
+/* ===== NID check message ===== */
+.nid-toast{
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #e6f4ea;
+  color: #0f5132;
+
+  font-size: 22px;          /* 👈 تكبير النص */
+  padding: 18px 32px;       /* 👈 تكبير الصندوق */
+  border-radius: 16px;
+  font-weight: 800;
+
+  box-shadow: 0 10px 28px rgba(0,0,0,.18);
+  opacity: 0;
+  transition: opacity .4s ease, transform .4s ease;
+  z-index: 9999;
+}
+
+.nid-toast.show{
+  opacity: 1;
+  transform: translateX(-50%) translateY(5px);
+}
+/* ===== آخر كود لكل مكان ===== */
+.last-codes-box{
+  margin:12px 0;
+  padding:12px 16px;
+  background:#f1f5fb;
+  border-radius:12px;
+  border-right:6px solid #003366;
+}
+
+.last-codes-box h4{
+  margin:0 0 6px 0;
+  color:#003366;
+  font-weight:800;
+  font-size:15px;
+}
+
+.last-codes-box span{
+  display:inline-block;
+  margin-left:10px;
+  font-weight:700;
+  color:#333;
+}
+/* ===== فاصل إنشاء كارت جديد ===== */
+.new-card-separator{
+  margin:25px 0 15px;
+  padding-top:15px;
+  border-top:3px dashed #003366;
+  text-align:center;
+}
+
+.new-card-separator h3{
+  margin:0;
+  font-size:18px;
+  font-weight:800;
+  color:#003366;
+  background:#eef3fb;
+  display:inline-block;
+  padding:6px 16px;
+  border-radius:12px;
+}
+/* ===== Loading Toast ===== */
+.loading-toast{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0,0,0,0.4); /* 👈 غمقان خفيف */
+  color: #fff;
+
+  font-size: 26px;
+  font-weight: 800;
+
+  z-index: 99999;
+  backdrop-filter: blur(3px);
+}index: 9998;
+}
+.loading-dots::after{
+  content:'';
+  animation: loadingDots 1.8s infinite steps(6);
+}
+
+@keyframes loadingDots{
+  0%   { content:''; }
+  16%  { content:'.'; }
+  32%  { content:'..'; }
+  48%  { content:'...'; }
+  64%  { content:'....'; }
+  80%  { content:'.....'; }
+  100% { content:'......'; }
+}
+
+/* ===== Spinner ===== */
+.spinner{
+  width:50px;
+  height:50px;
+  border:5px solid rgba(255,255,255,0.3);
+  border-top:5px solid #fff;
+  border-radius:50%;
+  animation: spin 1s linear infinite;
+  margin-bottom:15px;
+}
+
+@keyframes spin{
+  from{ transform: rotate(0deg); }
+  to{ transform: rotate(360deg); }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="top-nav">
+<button class="nav-btn" onclick="goToindex()">اللوحة الرئيسية</button>
+<button class="nav-btn" onclick="goToSearch()">صفحة البحث</button>
+<button class="nav-btn" onclick="goToEmployeeFormTop()">إضافة / تعديل موظف</button>
+</div>
+<header class="animated-header">
+  <h1>صفحة إضافة و تعديل الموظفين</h1>
+  <div class="dev-line">
+    تمت البرمجة بواسطة <span>الدكتور شارل مخلص</span>
+  </div>
+</header>
+
+<div class="container">
+  <h2 id="formTitle">إضافة / تعديل موظف</h2>
+  <div id="lastCodes" class="last-codes-box" style="display:none"></div>
+  <div id="formMsg"></div>
+  <div style="margin:10px 0">
+  <button class="main" onclick="uploadNidImage()">OCR</button>
+  <div style="margin-top:10px">
+
+<input
+type="text"
+id="empCode"
+placeholder="اكتب كود الموظف"
+style="padding:6px;border-radius:6px;border:1px solid #ccc;width:120px"
+/>
+
+<button class="main" onclick="uploadNidImage()">
+إضافة صورة بطاقة
+</button>
+
+<button class="main" onclick="uploadPersonalImage()">
+إضافة صورة شخصية
+</button>
+
+<input type="file" id="nidFile" accept="image/*" style="display:none">
+<input type="file" id="personalFile" accept="image/*" style="display:none">
+
+</div>
+  <input type="file" id="nidImage" accept="image/*" style="display:none">
+</div>
+  <div id="formArea">
+  <div class="loading-text">جاري التحميل...</div>
+</div>
+</div>
+
+<script>
+let headers=[], dropdownsGlobal={}, currentMatches=[];
+showLoadingToast();
+hideLoadingAfterFormRender();
+let pageLoadStart = Date.now();
+let selectedKey = localStorage.getItem('selectedEmployeeKey') || "";
+loadLastCodesPerPlace();
+// ================= التنقل =================
+let navigating = false;
+
+function goToPage(page) {
+  if (navigating) return;
+  navigating = true;
+
+  google.script.run.withSuccessHandler(url => {
+    window.top.location.href = url + '?page=' + encodeURIComponent(page);
+  }).getWebAppUrl();
+}
+
+function goToSearch() {
+  goToPage('Employees');
+}
+
+function goToindex() {
+  goToPage('index');
+}
+
+function goToEmployeeFormTop() {
+  localStorage.removeItem('selectedEmployeeKey');
+  goToPage('EmployeeForm');
+}
+
+// ================= تحميل الهيدر (بعد رسم الصفحة) =================
+setTimeout(() => {
+  google.script.run.withSuccessHandler(res=>{
+    headers = res.headers || [];
+    google.script.run.withSuccessHandler(dd=>{
+      dropdownsGlobal = dd || {};
+      buildForm();
+    }).getDropdownValues();
+  }).getEmployeesData();
+}, 0);
+
+
+// ================= إنشاء فورم =================
+function createForm(idx){
+   hideLoadingToast(); // أول ما الفورم يظهر
+  const wrap=document.createElement('div');
+  wrap.className='single-form';
+
+const h3 = document.createElement('h3');
+h3.id = `formTitle_${idx}`;
+h3.textContent = `بيانات الموظف (سجل رقم ${idx + 1})`;
+wrap.appendChild(h3);
+
+
+
+  const grid=document.createElement('div');
+  grid.className='form-grid';
+
+  headers.forEach((h,i)=>{
+    if(!h)return;
+    const f=document.createElement('div');f.className='field';
+    const l = document.createElement('label');
+l.textContent = h;
+
+// تمييز الحقول المهمة
+const title = h.trim(); // إزالة المسافات الزائدة
+
+if (title === 'مكان العمل' || title === 'حالة الموظف') {
+  l.style.color = '#c0392b';   // أحمر واضح
+  l.style.fontWeight = '900'; // تخانة أعلى
+}
+f.appendChild(l);
+
+    const id=`f_${idx}_${i}`;
+    let el;
+
+    if(dropdownsGlobal[h]){
+      el=document.createElement('select');
+      el.innerHTML='<option value="">(اختيار)</option>';
+      dropdownsGlobal[h].forEach(v=>{
+        const o=document.createElement('option');o.value=o.textContent=v;el.appendChild(o);
+      });
+    }else{
+      el=document.createElement('input');
+      if(/الرقم القومى|الرقم القومي/i.test(h)){
+        el.onblur = () => {
+  if (wrap.dataset.mode === 'new') {
+    checkNID(el.value.trim());
+  }
+};
+      }
+    }
+    el.id=id;
+    f.appendChild(el);
+    grid.appendChild(f);
+  });
+
+  wrap.appendChild(grid);
+
+  // زر حذف للسجلات القديمة
+  if(!wrap.dataset.mode && currentMatches[idx]){
+    const del=document.createElement('button');
+    del.className='delete';
+    del.textContent='مسح هذه البيانات';
+    del.onclick=()=>{
+google.script.run.withSuccessHandler(()=>{
+  showNIDToast('🗑️ تم حذف البيانات بنجاح');
+  loadEmployeeByKey(currentMatches[0].values[9]);
+}).deleteEmployeeRow(currentMatches[idx].rowindex);
+    };
+    wrap.appendChild(del);
+  }
+
+  return wrap;
+}
+function showLoadingToast(msg = "⏳ جاري تحميل البيانات"){
+  let toast = document.getElementById('loadingToast');
+
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'loadingToast';
+    toast.className = 'loading-toast';
+    document.body.appendChild(toast);
+  }
+
+  toast.innerHTML = `
+  <div style="text-align:center">
+    <div class="spinner"></div>
+    <div>${msg}<span class="loading-dots"></span></div>
+  </div>
+`;
+}
+function hideLoadingToast(){
+  const toast = document.getElementById('loadingToast');
+  if(toast) toast.remove();
+}
+
+// ================= بناء الصفحة =================
+function buildForm(){
+const area=document.getElementById('formArea');
+  hideLoadingWhenReady();
+  if(selectedKey){
+    loadEmployeeByKey(selectedKey);
+    localStorage.removeItem('selectedEmployeeKey');
+  }else{
+const f = createForm(0);
+f.dataset.mode = 'new';
+area.appendChild(f);
+// توليد الكود تلقائيا
+google.script.run.withSuccessHandler(code=>{
+  headers.forEach((h,c)=>{
+    if(/الكود/i.test(h)){
+      const el = document.getElementById(`f_0_${c}`);
+      if(el) el.value = code;
+    }
+  });
+}).getNextEmployeeCode();
+
+area.appendChild(makeAddOnlyButton());
+
+  }
+}
+function updateFormTitle(idx){
+  const title = document.getElementById(`formTitle_${idx}`);
+  if(!title) return;
+
+  const nameIdx  = headers.findindex(h => /اسم/i.test(h));
+  const placeIdx = headers.findindex(h => /مكان/i.test(h));
+
+  if(nameIdx === -1 || placeIdx === -1) return;
+
+  const row = currentMatches[idx];
+  if(!row || !row.values) return;
+
+  const empName   = row.values[nameIdx];
+  const workPlace = row.values[placeIdx];
+
+  if(empName && workPlace){
+    title.textContent = `بيانات [${empName}] في [${workPlace}]`;
+  }else{
+    title.textContent = `بيانات الموظف (سجل رقم ${idx + 1})`;
+  }
+}
+
+function loadLastCodesPerPlace(){
+
+  google.script.run.withSuccessHandler(res=>{
+    if(!res || !res.length) return;
+
+    const box = document.getElementById('lastCodes');
+    box.innerHTML = '<h4>آخر كود متاح (غير مكرر) لكل مكان عمل</h4>';
+
+    res.forEach(r=>{
+      const sp = document.createElement('span');
+      sp.textContent = `(${r.place} - ${r.safeNextCode})`;
+      box.appendChild(sp);
+    });
+
+    box.style.display = 'block';
+    
+  }).getSafeNextCodesForAllPlaces(); // 👈 بدل القديمة
+}
+
+// ================= تحميل موظف =================
+function loadEmployeeByKey(key){
+  google.script.run.withSuccessHandler(res=>{
+    const area=document.getElementById('formArea');
+    area.innerHTML='';
+    currentMatches=res.matches||[];
+    if(!currentMatches.length){
+  // موظف جديد – اعرض فورم فارغ
+  area.innerHTML = '';
+
+  currentMatches = (res.rows || []).map(r => ({ values: r }));
+
+  const f = createForm(0);
+  f.dataset.mode = 'new';
+  area.appendChild(f);
+
+  headers.forEach((h,c)=>{
+    if(/الرقم القومى|الرقم القومي/i.test(h)){
+      const el = document.getElementById(`f_0_${c}`);
+      if(el){
+        el.value = key;
+        el.readOnly = true;
+      }
+    }
+  });
+// توليد الكود تلقائيا
+google.script.run.withSuccessHandler(code=>{
+  headers.forEach((h,c)=>{
+    if(/الكود/i.test(h)){
+      const el = document.getElementById(`f_0_${c}`);
+      if(el) el.value = code;
+    }
+  });
+}).getNextEmployeeCode();
+
+  area.appendChild(makeAddOnlyButton());
+  return;
+}
+
+
+    currentMatches.forEach((r,i)=>{
+      const f=createForm(i);
+      area.appendChild(f);
+      r.values.forEach((v,c)=>{
+        const el=document.getElementById(`f_${i}_${c}`);
+        if(el)el.value=v;
+      });
+      updateFormTitle(i); // ✅ السطر ده هو الحل
+    });
+
+    // زر تعديل
+    const edit=document.createElement('button');
+    edit.className='main';
+    edit.textContent='تعديل بيانات الموظف';
+    edit.onclick=updateAll;
+    area.appendChild(edit);
+
+// ===== فاصل إنشاء كارت جديد =====
+const sep = document.createElement('div');
+sep.className = 'new-card-separator';
+sep.innerHTML = '<h3>إنشاء كارت جديد للموظف</h3>';
+area.appendChild(sep);
+
+// ===== فورم جديد لمكان عمل جديد =====
+const ni = currentMatches.length;
+const nf = createForm(ni);
+nf.dataset.mode = 'new';
+area.appendChild(nf);
+
+
+headers.forEach((h, c) => {
+  const el = document.getElementById(`f_${ni}_${c}`);
+  if (!el) return;
+
+  // الرقم القومي: يتنقل + readonly
+  if (/الرقم القومى|الرقم القومي/i.test(h)) {
+    el.value = key;
+    el.readOnly = true;
+    return;
+  }
+
+ if (/مكان\s*العمل/i.test(h)) {
+  el.value = '';
+
+  // إزالة أماكن العمل المستخدمة مسبقًا
+  const used = getUsedWorkPlaces();
+  if (el.tagName === 'SELECT') {
+    [...el.options].forEach(o => {
+      if (used.includes(o.value)) o.remove();
+    });
+  }
+  return;
+}
+
+
+  // باقي الحقول: تتنقل تلقائيًا وقابلة للتعديل
+  el.value = currentMatches[0].values[c] || '';
+});
+
+    area.appendChild(makeAddOnlyButton());
+  }).getEmployeeByKey(key);
+}
+
+// ================= أزرار =================
+function updateAll(){
+  currentMatches.forEach((r,i)=>{
+    const obj={};
+  headers.forEach((h,c)=>{
+  const el=document.getElementById(`f_${i}_${c}`);
+  if(el){
+    if(/تليفون/i.test(h) && el.value){
+      obj[h] = "'" + el.value;
+    }else{
+      obj[h] = el.value;
+    }
+    showLoadingToast("⏳ جاري تعديل بيانات الموظف");
+  }
+});
+
+google.script.run.withSuccessHandler(()=>{
+  hideLoadingToast(); // 👈 مهم
+  showNIDToast('✅ تم حفظ التعديلات بنجاح');
+}).updateEmployeeRow(r.rowindex,obj);
+  });
+}
+
+function makeAddOnlyButton(){
+  const b=document.createElement('button');
+  b.className='main';
+  b.textContent='حفظ بيانات جديدة';
+  b.onclick=()=>{
+    showLoadingToast("⏳ جاري حفظ البيانات");
+    const i=currentMatches.length||0,obj={};
+ headers.forEach((h,c)=>{
+  const el=document.getElementById(`f_${i}_${c}`);
+  if(el){
+    if(/تليفون/i.test(h) && el.value){
+      obj[h] = "'" + el.value;
+    }else{
+      obj[h] = el.value;
+    }
+  }
+});
+google.script.run.withSuccessHandler(()=>{
+  hideLoadingToast(); // 👈 مهم
+  showNIDToast('✅ تم حفظ البيانات بنجاح');
+}).saveEmployee(obj);
+  };
+  return b;
+}
+function showNIDToast(msg){
+  let toast = document.getElementById('nidToast');
+
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'nidToast';
+    toast.className = 'nid-toast';
+    document.body.appendChild(toast);
+  }
+
+  toast.textContent = msg;
+  toast.classList.add('show');
+
+  // تختفي تلقائيًا
+  setTimeout(()=>{
+    toast.classList.remove('show');
+  }, 4200);
+}
+
+function showMsg(t,c){
+  const m=document.getElementById('formMsg');
+  m.style.display='block';m.style.color=c;m.textContent=t;
+}
+function loadEmployeeByNationalId(nid){
+  google.script.run.withSuccessHandler(res=>{
+
+    currentMatches = (res.rows || []).map(r => ({
+      values: r
+    }));
+
+    const area = document.getElementById('formArea');
+
+    // ❌ الرقم القومي غير مسجل
+    if(!currentMatches.length){
+
+      // لا نمسح الفورم ولا نعيد بناؤه
+      showNIDToast('✓ تم التحقق: الرقم القومي غير مسجل من قبل');
+      return;
+    }
+
+    // ✅ الرقم القومي مسجل → نمسح ونملي
+    area.innerHTML = '';
+
+    currentMatches.forEach((r,i)=>{
+      const f = createForm(i);
+      area.appendChild(f);
+
+      r.values.forEach((v,c)=>{
+        const el = document.getElementById(`f_${i}_${c}`);
+        if(el) el.value = v;
+      });
+      updateFormTitle(i); // ✅ السطر ده هو الحل
+    });
+
+    const edit = document.createElement('button');
+    edit.className = 'main';
+    edit.textContent = 'تعديل بيانات الموظف';
+    edit.onclick = updateAll;
+    area.appendChild(edit);
+
+// ===== فاصل إنشاء كارت جديد =====
+const sep = document.createElement('div');
+sep.className = 'new-card-separator';
+sep.innerHTML = '<h3>إنشاء كارت جديد للموظف</h3>';
+area.appendChild(sep);
+
+// ===== فورم جديد لمكان عمل جديد =====
+const ni = currentMatches.length;
+const nf = createForm(ni);
+nf.dataset.mode = 'new';
+area.appendChild(nf);
+
+
+    headers.forEach((h,c)=>{
+      const el = document.getElementById(`f_${ni}_${c}`);
+      if(!el) return;
+
+      if(/الرقم القومى|الرقم القومي/i.test(h)){
+        el.value = nid;
+        el.readOnly = true;
+        return;
+      }
+
+      if(/مكان\s*العمل/i.test(h)){
+        el.value = '';
+        const used = getUsedWorkPlaces();
+        if (el.tagName === 'SELECT') {
+          [...el.options].forEach(o=>{
+            if (used.includes(o.value)) o.remove();
+          });
+        }
+        return;
+      }
+
+      el.value = currentMatches[0].values[c] || '';
+    });
+
+    area.appendChild(makeAddOnlyButton());
+
+    // رسالة تأكيد إن البيانات موجودة
+    showNIDToast('⚠️ هذه البيانات مسجلة من قبل');
+
+  }).getEmployeeByNationalId(nid);
+}
+
+
+function getUsedWorkPlaces() {
+  const idx = headers.findindex(h => /مكان\s*العمل/i.test(h));
+  if (idx === -1) return [];
+
+  return currentMatches
+    .map(r => r.values[idx])
+    .filter(v => v);
+}
+
+function checkNID(n){
+  if(!n) return;
+  loadEmployeeByNationalId(n);
+}
+function setActiveNav(name){
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.classList.remove('active');
+  });
+
+  if(name === 'index') document.querySelectorAll('.nav-btn')[0].classList.add('active');
+  if(name === 'search') document.querySelectorAll('.nav-btn')[1].classList.add('active');
+  if(name === 'form')   document.querySelectorAll('.nav-btn')[2].classList.add('active');
+}
+setActiveNav('form');
+
+function hideLoadingAfterFormRender(){
+  const area = document.getElementById('formArea');
+  if(!area) return;
+
+  const observer = new MutationObserver(() => {
+    // أول ما أي فورم يظهر
+    if (area.querySelector('.single-form')) {
+      observer.disconnect();
+      area.querySelectorAll('.loading-text').forEach(e => e.remove());
+    }
+  });
+
+  observer.observe(area, { childList: true, subtree: true });
+}
+
+function hideLoadingWhenReady(){
+  const area = document.getElementById('formArea');
+  if(!area) return;
+
+  const elapsed = Date.now() - pageLoadStart;
+  const minTime = 1000; // ثانية واحدة
+
+  const hide = () => {
+    // لو لسه مكتوب جاري التحميل
+    if (area.textContent.includes('جاري التحميل')) {
+    }
+  };
+
+  if (elapsed >= minTime) {
+    hide();
+  } else {
+    setTimeout(hide, minTime - elapsed);
+  }
+}
+function uploadNidImage(){
+
+  const input = document.getElementById("nidImage");
+  input.click();
+
+  input.onchange = function(){
+
+    const file = input.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+
+      const base64 = e.target.result.split(",")[1];
+
+      showNIDToast("جارى قراءة البطاقة...");
+
+      google.script.run.withSuccessHandler(res=>{
+
+        if(res.success){
+          showNIDToast("تم قراءة الرقم القومى: " + res.nid);
+        }else{
+          showNIDToast(res.message);
+        }
+
+      }).processNationalIdImage(base64);
+
+    };
+
+    reader.readAsDataURL(file);
+
+  };
+
+}
+function uploadNidImage(){
+
+const code=document.getElementById("empCode").value.trim();
+
+if(!code){
+showNIDToast("⚠️ يجب كتابة كود الموظف أولاً");
+return;
+}
+showNIDToast("⏳ جار رفع صورة البطاقة...");
+
+document.getElementById("nidFile").click();
+
+}
+
+document.getElementById("nidFile").onchange=function(){
+
+const file=this.files[0];
+
+const reader=new FileReader();
+
+reader.onload=function(e){
+showNIDToast("⏳ جار رفع الصورة...");
+google.script.run.withSuccessHandler(function(res){
+hideLoadingToast();
+if(res.success){
+showNIDToast("✅ تم رفع صورة البطاقة بنجاح");
+}else{
+  hideLoadingToast();
+showNIDToast(res.message);
+}
+
+}).uploadNationalIdByCode(
+document.getElementById("empCode").value,
+e.target.result
+);
+
+};
+
+reader.readAsDataURL(file);
+
+}
+
+
+
+function uploadPersonalImage(){
+
+const code=document.getElementById("empCode").value.trim();
+
+if(!code){
+alert("يجب كتابة كود الموظف أولا");
+return;
+}
+showNIDToast("⏳ جار رفع الصورة الشخصية...");
+document.getElementById("personalFile").click();
+
+}
+
+document.getElementById("personalFile").onchange=function(){
+
+const file=this.files[0];
+
+const reader=new FileReader();
+
+reader.onload=function(e){
+showNIDToast("⏳ جار رفع الصورة...");
+google.script.run.withSuccessHandler(function(res){
+hideLoadingToast();
+if(res.success){
+showNIDToast("✅ تم رفع الصورة الشخصية بنجاح");
+}else{
+hideLoadingToast();  
+showNIDToast(res.message);
+}
+
+}).uploadPersonalImageByCode(
+document.getElementById("empCode").value,
+e.target.result
+);
+
+};
+
+reader.readAsDataURL(file);
+
+}
+</script>
+
+</body>
+</html>
